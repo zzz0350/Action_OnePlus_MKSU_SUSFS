@@ -1,0 +1,82 @@
+name: Build OPlus SM7675 KernelSU
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Configure Git
+      run: |
+        git config --global user.name "wuua"
+        git config --global user.email "3436678798@qq.com"
+
+    - name: Clean up disk space
+      run: |
+        sudo apt-get clean
+        sudo rm -rf /usr/share/dotnet /etc/mysql /var/lib/mysql
+        sudo rm -rf /usr/local/lib/android
+        df -h
+        
+    - name: Install dependencies
+      run: |
+        sudo apt update && sudo apt upgrade -y
+        sudo apt install -y python3 git curl
+
+    - name: Install repo tool
+      run: |
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/repo
+        chmod a+x ~/repo
+        sudo mv ~/repo /usr/local/bin/repo
+
+    - name: Initialize repo and sync
+      run: |
+        mkdir kernel_workspace && cd kernel_workspace
+        repo init -u https://github.com/OnePlusOSS/kernel_manifest.git -b refs/heads/oneplus/sm7675 -m oneplus_ace_3v_v.xml --depth=1
+        repo sync
+        rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
+        rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
+        sed -i 's/ -dirty//g' kernel_platform/common/scripts/setlocalversion
+        sed -i 's/ -dirty//g' kernel_platform/msm-kernel/scripts/setlocalversion
+
+    - name: Set up KernelSU
+      run: |
+        cd kernel_workspace/kernel_platform/msm-kernel
+        curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -s next
+        cd KernelSU-Next
+        KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 10200)
+        echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
+        
+    - name: Build kernel
+      run: |
+        cd kernel_workspace
+        ./kernel_platform/oplus/build/oplus_build_kernel.sh pineapple gki
+
+    - name: Make AnyKernel3
+      run: |
+        git clone https://github.com/Kernel-SU/AnyKernel3 --depth=1
+        rm -rf ./AnyKernel3/.git
+        cp kernel_workspace/kernel_platform/out/msm-kernel-pineapple-gki/dist/Image ./AnyKernel3/
+
+    - name: Upload AnyKernel3
+      uses: actions/upload-artifact@v4
+      with:
+        name: AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-A15-OPlus-Ace-3V
+        path: ./AnyKernel3/*
+
+    - name: Upload kernel Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: Image-KernelSU-Next-${{ env.KSUVER }}-A15-OPlus-Ace-3V
+        path: kernel_workspace/kernel_platform/out/msm-kernel-pineapple-gki/dist/Image
+
+    - name: Upload boot.img
+      uses: actions/upload-artifact@v4
+      with:
+        name: boot-KernelSU-Next-${{ env.KSUVER }}-A15-OPlus-Ace-3V
+        path: kernel_workspace/kernel_platform/out/msm-kernel-pineapple-gki/dist/boot.img
