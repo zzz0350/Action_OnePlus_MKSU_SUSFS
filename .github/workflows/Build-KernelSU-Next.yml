@@ -1,4 +1,4 @@
-name: Build OPlus KernelSU Next
+name: Build KernelSU Next
 on:
   workflow_dispatch:
     inputs:
@@ -85,31 +85,15 @@ jobs:
         git clone https://github.com/Kernel-SU/AnyKernel3 --depth=1
         rm -rf ./AnyKernel3/.git
         cp kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/Image ./AnyKernel3/
-        7z a AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-A15-${{ github.event.inputs.FEIL }}.zip ./AnyKernel3/*
 
-     - name: Upload Release
-       uses: ncipollo/release-action@main
-       with:
-        artifacts: ${{ github.workspace }}/AnyKernel3/*
-        name: ${{ github.event.inputs.FEIL }}
-        tag: ${{ github.event.inputs.FEIL }}-${{ env.KSUVER }}
-        allowUpdates: true
-        artifactErrorsFailBuild: true
-          
      - name: Upload AnyKernel3
        uses: actions/upload-artifact@v4
        with:
-        name: AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-A15-${{ github.event.inputs.FEIL }}
+        name: AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}
         path: ./AnyKernel3/*
-
-     - name: Upload kernel Image
-       uses: actions/upload-artifact@v4
-       with:
-        name: Image-KernelSU-Next-${{ env.KSUVER }}-A15-${{ github.event.inputs.FEIL }}
-        path: kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/Image
 
      - name: Upload boot.img
        uses: actions/upload-artifact@v4
        with:
-        name: boot-KernelSU-Next-${{ env.KSUVER }}-A15-${{ github.event.inputs.FEIL }}
+        name: boot-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}
         path: kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/boot.img
