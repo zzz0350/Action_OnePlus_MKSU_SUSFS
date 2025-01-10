@@ -88,13 +88,15 @@ jobs:
         7z a AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}.zip ./AnyKernel3/*
 
      - name: Upload to Release
-       uses: softprops/action-gh-release@v1
+       uses: softprops/action-gh-release@v2
        with:
         files: |
           ./AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}.zip
           ./kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/boot.img
-        name: AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}
+        name: KernelSU Next_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
         tag_name: ${{ env.KSUVER }}
-        body: ${{ github.event.inputs.FEIL }}
+        body: |
+           设备：${{ github.event.inputs.FEIL }}
+           KernelSU Next版本：${{ env.KSUVER }}
        env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
