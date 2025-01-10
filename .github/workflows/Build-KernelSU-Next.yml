@@ -85,15 +85,16 @@ jobs:
         git clone https://github.com/Kernel-SU/AnyKernel3 --depth=1
         rm -rf ./AnyKernel3/.git
         cp kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/Image ./AnyKernel3/
+        7z a AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}.zip ./AnyKernel3/*
 
-     - name: Upload AnyKernel3
-       uses: actions/upload-artifact@v4
+     - name: Upload to Release
+       uses: softprops/action-gh-release@v1
        with:
+        files: |
+          ./AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}.zip
+          ./kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/boot.img
         name: AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}
-        path: ./AnyKernel3/*
-
-     - name: Upload boot.img
-       uses: actions/upload-artifact@v4
-       with:
-        name: boot-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}
-        path: kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/boot.img
+        tag_name: ${{ env.KSUVER }}
+        body: ${{ github.event.inputs.FEIL }}
+       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
