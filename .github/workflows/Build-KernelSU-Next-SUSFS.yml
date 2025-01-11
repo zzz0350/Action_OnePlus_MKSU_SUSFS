@@ -24,7 +24,7 @@ on:
         default: '6.1'
 
 jobs:
-  build-kernel-a14-kernelsu-susfs:
+  build:
     runs-on: ubuntu-latest
     
     steps:
