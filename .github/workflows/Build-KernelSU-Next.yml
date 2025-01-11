@@ -20,6 +20,11 @@ jobs:
    runs-on: ubuntu-latest
 
    steps:
+     - name: Check Out
+       uses: actions/checkout@v3
+     - name: Cleanup
+       uses: rokibhasansagar/slimhub_actions@main
+      
      - name: Maximize build
        uses: easimon/maximize-build-space@master
        with:
@@ -30,6 +35,11 @@ jobs:
          remove-android: 'true'
          remove-haskell: 'true'
          
+     - name: Set Swap Space
+       uses: pierotofy/set-swap-space@master
+       with:
+         swap-size-gb: 12
+        
      - name: Checkout code
        uses: actions/checkout@v3
 
@@ -88,9 +98,9 @@ jobs:
         7z a AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}.zip ./AnyKernel3/*
 
      - name: Upload to Release
-       uses: softprops/action-gh-release@v2
+       uses: softprops/action-gh-release@v1
        with:
-        files: |
+        files: | 
           ./AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}.zip
           ./kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/boot.img
         name: KernelSU Next_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
@@ -100,3 +110,4 @@ jobs:
            KernelSU Next版本：${{ env.KSUVER }}
        env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
