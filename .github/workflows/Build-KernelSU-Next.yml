@@ -34,11 +34,6 @@ jobs:
          remove-dotnet: 'true'
          remove-android: 'true'
          remove-haskell: 'true'
-         
-     - name: Set Swap Space
-       uses: pierotofy/set-swap-space@master
-       with:
-         swap-size-gb: 12
         
      - name: Checkout code
        uses: actions/checkout@v3
