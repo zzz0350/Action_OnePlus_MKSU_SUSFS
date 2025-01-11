@@ -22,21 +22,9 @@ jobs:
    steps:
      - name: Check Out
        uses: actions/checkout@v3
+       
      - name: Cleanup
        uses: rokibhasansagar/slimhub_actions@main
-      
-     - name: Maximize build
-       uses: easimon/maximize-build-space@master
-       with:
-         swap-size-mb: 8192
-         root-reserve-mb: 4096
-         temp-reserve-mb: 4096
-         remove-dotnet: 'true'
-         remove-android: 'true'
-         remove-haskell: 'true'
-        
-     - name: Checkout code
-       uses: actions/checkout@v3
 
      - name: Configure Git
        run: |
@@ -90,19 +78,16 @@ jobs:
         git clone https://github.com/Kernel-SU/AnyKernel3 --depth=1
         rm -rf ./AnyKernel3/.git
         cp kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/Image ./AnyKernel3/
-        7z a AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}.zip ./AnyKernel3/*
 
-     - name: Upload to Release
-       uses: softprops/action-gh-release@v1
+     - name: Upload AnyKernel3
+       uses: actions/upload-artifact@v4
        with:
-        files: | 
-          ./AnyKernel3-KernelSU-Next-${{ env.KSUVER }}-${{ github.event.inputs.FEIL }}.zip
-          ./kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/boot.img
-        name: KernelSU Next_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
-        tag_name: ${{ env.KSUVER }}
-        body: |
-           设备：${{ github.event.inputs.FEIL }}
-           KernelSU Next版本：${{ env.KSUVER }}
-       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+        name: AnyKernel3_KernelSU_Next_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
+        path: ./AnyKernel3/*
+
+     - name: Upload boot.img
+       uses: actions/upload-artifact@v4
+       with:
+        name: boot_KernelSU_Next_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
+        path: kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/boot.img
+
