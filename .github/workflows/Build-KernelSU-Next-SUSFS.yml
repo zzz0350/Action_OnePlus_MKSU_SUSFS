@@ -1,4 +1,4 @@
-name: Build KernelSU Next
+name: Build KernelSU Next SUSFS
 on:
   workflow_dispatch:
     inputs:
@@ -24,7 +24,7 @@ on:
         default: '6.1'
         
 jobs:
-  build:
+  Build-KernelSU-Next-SUSFS:
    runs-on: ubuntu-latest
 
    steps:
