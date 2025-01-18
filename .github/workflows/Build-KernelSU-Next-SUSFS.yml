@@ -126,21 +126,9 @@ jobs:
         run: |
          cd kernel_workspace
          ./kernel_platform/oplus/build/oplus_build_kernel.sh ${{ github.event.inputs.CPUD }} gki
-
-      - name: Make AnyKernel3
-        run: |
-         git clone https://github.com/Kernel-SU/AnyKernel3 --depth=1
-         rm -rf ./AnyKernel3/.git
-         cp kernel_workspace/out/dist/Image ./AnyKernel3/
- 
-      - name: Upload AnyKernel3
+         
+      - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-         name: AnyKernel3_KernelSU_Next_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
-         path: ./AnyKernel3/*
- 
-      - name: Upload boot.img
-        uses: actions/upload-artifact@v4
-        with:
-         name: boot_KernelSU_Next_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
-         path: kernel_workspace/out/dist/boot.img
+         name: Image
+         path: kernel_workspace/out/dist/Image
