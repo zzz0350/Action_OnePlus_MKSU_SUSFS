@@ -131,4 +131,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
          name: Image
-         path: out/dist/Image
+         path: kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/Image
