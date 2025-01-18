@@ -126,6 +126,7 @@ jobs:
         run: |
          cd kernel_workspace
          ./kernel_platform/oplus/build/oplus_build_kernel.sh ${{ github.event.inputs.CPUD }} gki
+         ls
          
       - name: Upload Image
         uses: actions/upload-artifact@v4
