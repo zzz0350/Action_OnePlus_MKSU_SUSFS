@@ -131,4 +131,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
          name: Image
-         path: ../kernel_workspace/out/dist/Image
+         path: out/dist/Image
