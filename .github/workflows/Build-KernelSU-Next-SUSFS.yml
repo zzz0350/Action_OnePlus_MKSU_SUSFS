@@ -111,5 +111,5 @@ jobs:
       - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-         name: Image
+         name: Image_KernelSU_Next_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
          path: kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/Image
