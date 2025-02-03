@@ -22,7 +22,16 @@ on:
         description: "内核版本"
         required: true
         default: '6.1'
-
+      KSUNEXT_ENABLED:
+        description: "添加 KSU Next"
+        required: true
+        type: boolean
+        default: false
+      SUSFS_ENABLED:
+        description: "添加 SUSFS"
+        required: true
+        type: boolean
+        default: false
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -65,6 +74,7 @@ jobs:
          sed -i 's/ -dirty//g' kernel_platform/msm-kernel/scripts/setlocalversion
 
       - name: Set up KernelSU Next
+        if: github.event.inputs.KSUNEXT_ENABLED == 'true'
         run: |
          cd kernel_workspace/kernel_platform
          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -s next
@@ -74,6 +84,7 @@ jobs:
          sed -i "s/DKSU_VERSION=16/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
         
       - name: Set up susfs
+        if: github.event.inputs.SUSFS_ENABLED == 'true'
         run: |
            cd kernel_workspace
            git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}
