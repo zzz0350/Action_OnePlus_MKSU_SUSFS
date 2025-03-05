@@ -98,7 +98,7 @@ jobs:
           if [[ "${{ github.event.inputs.kernelsu_version }}" == "tag" ]]; then
             echo "BRANCH=-" >> $GITHUB_ENV
           elif [[ "${{ github.event.inputs.kernelsu_version }}" == "main" ]]; then
-            echo "BRANCH=-s susfs" >> $GITHUB_ENV
+            echo "BRANCH=-s susfs_patch" >> $GITHUB_ENV
           fi
 
       - name: kernelsu-next version
@@ -198,18 +198,10 @@ jobs:
           cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch ./common/
           cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
           cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
-          cd ./KernelSU
-          echo "正在给MKSU-SKN打susfs补丁"
-          cp ./patch/* ./
-          patch --fuzz=3 -p1 < MKSU-SKN_susfs.patch || true
-          echo "nongki 修复补丁"
-          patch --fuzz=3 -p1 < nongki_fix.patch || true
-          echo "nongki sed 修复补丁"
-          chmod 777 nongki_fix.sh
-          ./nongki_fix.sh
+          
           
           echo "正在给内核打susfs补丁"
-          cd ../common
+          cd ./common
           patch -p1 < 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch || true
           
           echo "完成"
