@@ -50,12 +50,12 @@ on:
         default: true
       VFS_patch_ENABLED:
         description: "添加vfs补丁（新钩子）？"
-        required: false
+        required: true
         type: choice
         options:
           - enable
           - disable
-        default: disable
+        default: enable
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -184,7 +184,7 @@ jobs:
           echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./common/arch/arm64/configs/gki_defconfig
 
           # Remove check_defconfig
-          #sed -i 's/check_defconfig//' ./common/build.config.gki
+          sed -i 's/check_defconfig//' ./common/build.config.gki
 
       - name: Add make name
         run: |
