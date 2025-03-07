@@ -143,9 +143,9 @@ jobs:
         if: ${{ github.event.inputs.VFS_patch_ENABLED == 'true' }}
         run: |
           cd kernel_workspace/kernel_platform/common
-          cp ../../kernel_patches/hooks/ksu_hooks.patch ./
+          cp ../../kernel_patches/hooks/new_hooks.patch ./
           echo "正在打vfs补丁"
-          patch -p1 -F 3 < ksu_hooks.patch
+          patch -p1 -F 3 < new_ooks.patch
           echo "完成"
 
       - name: Add SUSFS Configuration Settings
