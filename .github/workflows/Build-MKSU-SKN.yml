@@ -51,8 +51,11 @@ on:
       VFS_patch_ENABLED:
         description: "添加vfs补丁（新钩子）？"
         required: false
-        type: boolean
-        default: false
+        type: choice
+        options:
+          - enable
+          - disable
+        default: disable
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -140,7 +143,7 @@ jobs:
           patch -p1 -F 3 < 69_hide_stuff.patch
          
       - name: Apply New Hooks Patches
-        if: ${{ github.event.inputs.VFS_patch_ENABLED == 'true' }}
+        if: ${{ github.event.inputs.VFS_patch_ENABLED == 'enable' }}
         run: |
           cd kernel_workspace/kernel_platform/common
           cp ../../kernel_patches/hooks/new_hooks.patch ./
@@ -154,7 +157,7 @@ jobs:
           echo "CONFIG_KSU=y" >> kernel_workspace/kernel_platform/common/arch/arm64/configs/gki_defconfig
 
           # Add VFS configuration settings
-          if [[ "${github.event.inputs.VFS_patch_ENABLED}" == 'true' ]]; then
+          if [[ "${github.event.inputs.VFS_patch_ENABLED}" == 'enable' ]]; then
             echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> kernel_workspace/kernel_platform/common/arch/arm64/configs/gki_defconfig
             echo "CONFIG_KSU_HOOK=y" >> kernel_workspace/kernel_platform/common/arch/arm64/configs/gki_defconfig
             echo "CONFIG_KSU_WITH_KPROBES=n" >> kernel_workspace/kernel_platform/common/arch/arm64/configs/gki_defconfig
