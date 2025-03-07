@@ -148,7 +148,7 @@ jobs:
           cd kernel_workspace/kernel_platform/common
           cp ../../kernel_patches/hooks/new_hooks.patch ./
           echo "正在打vfs补丁"
-          patch -p1 -F 3 < new_ooks.patch
+          patch -p1 -F 3 < new_hooks.patch
           echo "完成"
 
       - name: Add SUSFS Configuration Settings
