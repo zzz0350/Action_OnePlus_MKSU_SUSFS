@@ -138,7 +138,7 @@ jobs:
           patch -p1 -F 3 < 69_hide_stuff.patch
          
       - name: Apply New Hooks Patches
-        if: ${{ github.event.inputs.VFS_patch_ENABLED == true }}
+        if: ${{ github.event.inputs.VFS_patch_ENABLED == 'true' }}
         run: |
           cd kernel_workspace/kernel_platform/common
           cp ../../kernel_patches/hooks/new_hooks.patch ./
@@ -147,7 +147,7 @@ jobs:
           echo "完成"
 
       - name: Add SUSFS Configuration Settings
-        if: ${{ github.event.inputs.VFS_patch_ENABLED == true }}
+        if: ${{ github.event.inputs.VFS_patch_ENABLED == 'true' }}
         run: |
           cd kernel_workspace/kernel_platform
           # Add KSU configuration settings
