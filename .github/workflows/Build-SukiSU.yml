@@ -5,11 +5,11 @@ on:
       CPU:
         description: "分支"
         required: true
-        default: 'sm8650'
+        default: 'kplatform'
       FEIL:
         description: "配置文件"
         required: true
-        default: 'oneplus_ace3_pro_v'
+        default: 'default'
       CPUD:
         description: "处理器代号"
         required: true
@@ -31,6 +31,7 @@ on:
         required: true
         type: choice
         options:
+          - Kernel
           - SukiSU
         default: SukiSU
       kernelsu_version:
@@ -38,19 +39,23 @@ on:
         required: true
         type: choice
         options:
+          - without ksu
+          - tag
           - main
-          - dev
-        default: dev
+        default: main
       SUSFS_ENABLED:
         description: "添加 SUSFS"
         required: true
         type: boolean
         default: true
       VFS_patch_ENABLED:
-        description: "添加vfs补丁（手动钩子）"
+        description: "添加vfs补丁（新钩子）？"
         required: true
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - enable
+          - disable
+        default: enable
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -78,14 +83,14 @@ jobs:
 
       - name: Install repo tool
         run: |
-         curl https://storage.googleapis.com/git-repo-downloads/repo  > ~/repo
+         curl https://storage.googleapis.com/git-repo-downloads/repo > ~/repo
          chmod a+x ~/repo
          sudo mv ~/repo /usr/local/bin/repo
 
       - name: Initialize repo and sync
         run: |
          mkdir kernel_workspace && cd kernel_workspace
-         repo init -u https://github.com/OnePlusOSS/kernel_manifest.git  -b refs/heads/oneplus/${{ github.event.inputs.CPU }} -m ${{ github.event.inputs.FEIL }}.xml --depth=1
+         repo init -u https://github.com/DonJone/OnePlus12-Kernel-third-manifest.git -b main -m default.xml --depth=1
          repo sync
          rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
          rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
@@ -93,11 +98,11 @@ jobs:
          sed -i 's/ -dirty//g' kernel_platform/msm-kernel/scripts/setlocalversion
       
       - name: KernelSU & SukiSU version
-        if: ${{ github.event.inputs.kernelsu_variant == 'SukiSU' }}
+        if: ${{ github.event.inputs.kernelsu_variant == 'Official' || github.event.inputs.kernelsu_variant == 'SukiSU' }}
         run: |
-          if [[ "${{ github.event.inputs.kernelsu_version }}" == "main" ]]; then
-            echo "BRANCH=-s susfs-stable" >> $GITHUB_ENV
-          elif [[ "${{ github.event.inputs.kernelsu_version }}" == "dev" ]]; then
+          if [[ "${{ github.event.inputs.kernelsu_version }}" == "tag" ]]; then
+            echo "BRANCH=-" >> $GITHUB_ENV
+          elif [[ "${{ github.event.inputs.kernelsu_version }}" == "main" ]]; then
             echo "BRANCH=-s susfs-dev" >> $GITHUB_ENV
           fi
           
@@ -105,18 +110,18 @@ jobs:
         if: ${{ github.event.inputs.kernelsu_variant == 'SukiSU' }}
         run: |
           cd kernel_workspace/kernel_platform
-          curl -LSs "https://raw.githubusercontent.com/ShirkNeko/KernelSU/main/kernel/setup.sh " | bash ${{ env.BRANCH }}
+          curl -LSs "https://raw.githubusercontent.com/ShirkNeko/KernelSU/main/kernel/setup.sh" | bash ${{ env.BRANCH }}
           cd ./KernelSU
           KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 12500)
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
           #sed -i "s/DKSU_VERSION=16/DKSU_VERSION=12581/" kernel/Makefile
           
       - name: Apply SUSFS Patches SukiSU
-        if: ${{ github.event.inputs.SUSFS_ENABLED == 'true' }}
+        if: ${{ (inputs.kernelsu_variant == 'SukiSU') && github.event.inputs.SUSFS_ENABLED == 'true' }}
         run: |
           cd kernel_workspace
-          git clone https://gitlab.com/simonpunk/susfs4ksu.git  -b gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}
-          git clone https://github.com/ShirkNeko/SukiSU_patch.git 
+          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}
+          git clone https://github.com/ShirkNeko/SukiSU_patch.git
           cd kernel_platform
 
           # Copy SUSFS patches
@@ -138,7 +143,7 @@ jobs:
           patch -p1 -F 3 < 69_hide_stuff.patch
          
       - name: Apply New Hooks Patches
-        if: ${{ github.event.inputs.VFS_patch_ENABLED == 'true' }}
+        if: ${{ github.event.inputs.VFS_patch_ENABLED == 'enable' }}
         run: |
           cd kernel_workspace/kernel_platform/common
           cp ../../SukiSU_patch/hooks/new_hooks.patch ./
@@ -147,14 +152,18 @@ jobs:
           echo "完成"
 
       - name: Add SUSFS Configuration Settings
-        if: ${{ github.event.inputs.VFS_patch_ENABLED == 'true' }}
         run: |
           cd kernel_workspace/kernel_platform
           # Add KSU configuration settings
           echo "CONFIG_KSU=y" >> ./common/arch/arm64/configs/gki_defconfig
-          
-          echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
+
+          # Add VFS configuration settings
+          if [[ "${{ github.event.inputs.VFS_patch_ENABLED }}" == 'enable' ]]; then
+            echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
+          else
+            echo "CONFIG_KSU_SUSFS_SUS_SU=y" >> ./common/arch/arm64/configs/gki_defconfig
+          fi
           
           # Add SUSFS configuration settings
           echo "CONFIG_KSU_SUSFS=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -196,7 +205,7 @@ jobs:
          
       - name: Make AnyKernel3
         run: |
-         git clone https://github.com/Kernel-SU/AnyKernel3  --depth=1
+         git clone https://github.com/Kernel-SU/AnyKernel3 --depth=1
          rm -rf ./AnyKernel3/.git
          cp kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/Image ./AnyKernel3/
          cp kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/Image ./kernel_workspace/kernel
