@@ -93,7 +93,7 @@ jobs:
          sed -i 's/ -dirty//g' kernel_platform/msm-kernel/scripts/setlocalversion
       
       - name: KernelSU & SukiSU version
-        if: ${{ github.event.inputs.kernelsu_variant == 'Official' || github.event.inputs.kernelsu_variant == 'SukiSU' }}
+        if: ${{ github.event.inputs.kernelsu_variant == 'SukiSU' }}
         run: |
           if [[ "${{ github.event.inputs.kernelsu_version }}" == "main" ]]; then
             echo "BRANCH=-s susfs-stable" >> $GITHUB_ENV
