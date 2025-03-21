@@ -40,7 +40,7 @@ on:
         options:
           - main
           - dev
-        default: main
+        default: dev
       SUSFS_ENABLED:
         description: "添加 SUSFS"
         required: true
