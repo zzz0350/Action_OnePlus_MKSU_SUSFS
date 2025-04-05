@@ -240,7 +240,7 @@ jobs:
 
           # 定义目录路径
           dir1="kernel_workspace/kernel_platform/out/msm-kernel-${{ github.event.inputs.CPUD }}-gki/dist/"
-          dir2="kernel_workspace/kernel_platform/common/arch/arm64/boot/"
+          dir2="kernel_workspace/kernel_platform/common/out/arch/arm64/boot/"
           target1="./AnyKernel3/"
           target2="./kernel_workspace/kernel"
 
@@ -256,9 +256,9 @@ jobs:
               cp "$dir2"Image "$target1"
               cp "$dir2"Image "$target2"
             else
-              # 在 kernel_workspace/kernel_platform/common/ 的所有子目录中查找 Image 文件
-              echo "在 kernel_workspace/kernel_platform/common/ 的所有子目录中查找 Image 文件"
-              image_path=$(find "kernel_workspace/kernel_platform/common/" -name "Image" | head -n 1)
+              # 在 kernel_workspace/kernel_platform/common/out/ 的所有子目录中查找 Image 文件
+              echo "在 kernel_workspace/kernel_platform/common/out/ 的所有子目录中查找 Image 文件"
+              image_path=$(find "kernel_workspace/kernel_platform/common/out/" -name "Image" | head -n 1)
               
               if [ -n "$image_path" ]; then
                 echo "找到 Image 文件: $image_path"
